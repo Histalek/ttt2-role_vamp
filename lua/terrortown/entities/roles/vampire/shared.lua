@@ -192,6 +192,7 @@ if SERVER then
 		if IsValid(attacker) and attacker:IsPlayer() and attacker:GetSubRole() == ROLE_VAMPIRE then
 			attacker:SetNWBool("InBloodlust", false)
 			attacker:SetNWInt("Bloodlust", CurTime() + GetConVar("ttt2_vamp_bloodtime"):GetInt())
+			attacker:SetMaxHealth(attacker:GetMaxHealth() + 20)
 		end
 
 		if victim:GetSubRole() == ROLE_VAMPIRE and victim:GetNWBool("transformedVamp", false) then
@@ -210,8 +211,7 @@ if SERVER then
 
 			local heal = math.ceil(attacker:Health() + dmginfo:GetDamage() * 0.5)
 
-			attacker:SetMaxHealth(math.max(heal, attacker:GetMaxHealth()))
-			attacker:SetHealth(heal)
+			attacker:SetHealth(math.min(heal, attacker:GetMaxHealth()))
 		end
 	end)
 else -- CLIENT
