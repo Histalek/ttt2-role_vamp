@@ -15,68 +15,64 @@ end
 
 include("pigeon.lua")
 
-ROLE.color = Color(149, 43, 37, 255) -- ...
-ROLE.dkcolor = Color(67, 3, 0, 255) -- ...
-ROLE.bgcolor = Color(29, 116, 40, 255) -- ...
-ROLE.abbr = "vamp" -- abbreviation
-ROLE.defaultEquipment = SPECIAL_EQUIPMENT -- here you can set up your own default equipment
-ROLE.surviveBonus = 0.5 -- bonus multiplier for every survive while another player was killed
-ROLE.scoreKillsMultiplier = 5 -- multiplier for kill of player of another team
-ROLE.scoreTeamKillsMultiplier = -16 -- multiplier for teamkill
+function ROLE:PreInitialize()
+	self.color = Color(149, 43, 37, 255) -- ...
+	self.dkcolor = Color(67, 3, 0, 255) -- ...
+	self.bgcolor = Color(29, 116, 40, 255) -- ...
+	self.abbr = "vamp" -- abbreviation
+	self.surviveBonus = 0.5 -- bonus multiplier for every survive while another player was killed
+	self.scoreKillsMultiplier = 5 -- multiplier for kill of player of another team
+	self.scoreTeamKillsMultiplier = -16 -- multiplier for teamkill
+	
+	self.defaultTeam = TEAM_TRAITOR
+	self.defaultEquipment = SPECIAL_EQUIPMENT -- here you can set up your own default equipment
 
-ROLE.conVarData = {
-	pct = 0.1, -- necessary: percentage of getting this role selected (per player)
-	maximum = 1, -- maximum amount of roles in a round
-	minPlayers = 10, -- minimum amount of players until this role is able to get selected
-	togglable = true, -- option to toggle a role for a client if possible (F1 menu)
-	credits = 2
-}
+	self.conVarData = {
+		pct = 0.1, -- necessary: percentage of getting this role selected (per player)
+		maximum = 1, -- maximum amount of roles in a round
+		minPlayers = 10, -- minimum amount of players until this role is able to get selected
+		togglable = true, -- option to toggle a role for a client if possible (F1 menu)
+		credits = 2
+	}
+end
 
--- now link this subrole with its baserole
-hook.Add("TTT2BaseRoleInit", "TTT2ConBRTWithVamp", function()
-	VAMPIRE:SetBaseRole(ROLE_TRAITOR)
-end)
-
-hook.Add("TTT2RolesLoaded", "AddVampTeam", function()
-	VAMPIRE.defaultTeam = TEAM_TRAITOR
-end)
-
-hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicVampCVars", function(tbl)
-	tbl[ROLE_VAMPIRE] = tbl[ROLE_VAMPIRE] or {}
-
-	table.insert(tbl[ROLE_VAMPIRE], {cvar = "ttt2_vamp_bloodtime", slider = true, desc = "vampire bloodlust time"})
-end)
-
--- if sync of roles has finished
-hook.Add("TTT2FinishedLoading", "VampInitT", function()
+function ROLE:Initialize()
+	roles.SetBaseRole(self, ROLE_TRAITOR)
+	
 	if CLIENT then
 		-- setup here is not necessary but if you want to access the role data, you need to start here
 		-- setup basic translation !
-		LANG.AddToLanguage("English", VAMPIRE.name, "Vampire")
-		LANG.AddToLanguage("English", "info_popup_" .. VAMPIRE.name, [[You are a Vampire!
+		LANG.AddToLanguage("English", self.name, "Vampire")
+		LANG.AddToLanguage("English", "info_popup_" .. self.name, [[You are a Vampire!
 It's time for some blood!
 Otherwise, you will die...]])
-		LANG.AddToLanguage("English", "body_found_" .. VAMPIRE.abbr, "This was a Vampire...")
-		LANG.AddToLanguage("English", "search_role_" .. VAMPIRE.abbr, "This person was a Vampire!")
-		LANG.AddToLanguage("English", "target_" .. VAMPIRE.name, "Vampire")
-		LANG.AddToLanguage("English", "ttt2_desc_" .. VAMPIRE.name, [[The Vampire is a Traitor (who works together with the other traitors) and the goal is to kill all other roles except the other traitor roles ^^
+		LANG.AddToLanguage("English", "body_found_" .. self.abbr, "This was a Vampire...")
+		LANG.AddToLanguage("English", "search_role_" .. self.abbr, "This person was a Vampire!")
+		LANG.AddToLanguage("English", "target_" .. self.name, "Vampire")
+		LANG.AddToLanguage("English", "ttt2_desc_" .. self.name, [[The Vampire is a Traitor (who works together with the other traitors) and the goal is to kill all other roles except the other traitor roles ^^
 The vampire CAN'T access the ([C]) shop, but he can transform into a pigeon by pressing [LALT] (Walk-slowly key). To make it balanced, the Vampire needs to kill another player every minute. Otherwise, he will fall into Bloodlust. In Bloodlust, the Vampire loses 1 hp every 2 seconds.
 In Bloodlust, the vampire heals 50% of the damage he did to other players. In addition to that, he can just transform into Pigeon if he is in bloodlust. So you be also able to trigger into bloodlust, but it's not possible to undo it.]])
 
 		---------------------------------
 
 		-- maybe this language as well...
-		LANG.AddToLanguage("Deutsch", VAMPIRE.name, "Vampir")
-		LANG.AddToLanguage("Deutsch", "info_popup_" .. VAMPIRE.name, [[Du bist ein Vampir!
+		LANG.AddToLanguage("Deutsch", self.name, "Vampir")
+		LANG.AddToLanguage("Deutsch", "info_popup_" .. self.name, [[Du bist ein Vampir!
 Es ist Zeit für etwas Blut!
 Ansonsten wirst du sterben...]])
-		LANG.AddToLanguage("Deutsch", "body_found_" .. VAMPIRE.abbr, "Er war ein Vampir...")
-		LANG.AddToLanguage("Deutsch", "search_role_" .. VAMPIRE.abbr, "Diese Person war ein Vampir!")
-		LANG.AddToLanguage("Deutsch", "target_" .. VAMPIRE.name, "Vampir")
-		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. VAMPIRE.name, [[Der Vampir ist ein Verräter (der mit den anderen Verräter-Rollen zusammenarbeitet) und dessen Ziel es ist, alle anderen Rollen (außer Verräter-Rollen) zu töten ^^
+		LANG.AddToLanguage("Deutsch", "body_found_" .. self.abbr, "Er war ein Vampir...")
+		LANG.AddToLanguage("Deutsch", "search_role_" .. self.abbr, "Diese Person war ein Vampir!")
+		LANG.AddToLanguage("Deutsch", "target_" .. self.name, "Vampir")
+		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. self.name, [[Der Vampir ist ein Verräter (der mit den anderen Verräter-Rollen zusammenarbeitet) und dessen Ziel es ist, alle anderen Rollen (außer Verräter-Rollen) zu töten ^^
 Er kann NICHT den ([C]) Shop betreten, doch dafür kann er sich, wenn er die Taste [LALT] (Walk-slowly Taste) drückt, in eine Taube verwandeln. Damit der Vampir nicht zu stark ist, muss er jede Minute einen anderen Spieler killen. Ansonsten fällt er in den Blutdurst. Im Blutdurst verliert der Vampir jede Sekunde 1hp.
 Allerdings heilt er sich im Blutdurst auch um 50% des Schadens, den er anderen Spielern zufügt. Er kann sich auch nur im Blutdurst transformieren. Du kannst also mit [LALT] den Blutdurst triggern, doch es nicht rückgängig machen.]])
 	end
+end
+
+hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicVampCVars", function(tbl)
+	tbl[ROLE_VAMPIRE] = tbl[ROLE_VAMPIRE] or {}
+
+	table.insert(tbl[ROLE_VAMPIRE], {cvar = "ttt2_vamp_bloodtime", slider = true, desc = "vampire bloodlust time"})
 end)
 
 if SERVER then
@@ -208,8 +204,8 @@ if SERVER then
 		and attacker:GetNWBool("InBloodlust", false)
 		then
 			dmginfo:ScaleDamage(1.125)
-
-			local heal = math.ceil(attacker:Health() + dmginfo:GetDamage() * 0.5)
+			
+			local heal = math.min(ply:Health() or 100, math.ceil(attacker:Health() + dmginfo:GetDamage() * 0.5))
 
 			attacker:SetHealth(math.min(heal, attacker:GetMaxHealth()))
 		end
